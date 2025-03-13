@@ -1,0 +1,65 @@
+{
+  "typescript page": {
+    "scope": "typescript,typescriptreact",
+    "prefix": "page",
+    "body": [
+      "import React from \"react\";",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}}: React.FC = () => {",
+      "  return <>${1:first}</>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}};",
+      ""
+    ]
+  },
+  "javascript page": {
+    "scope": "javascript,javascriptreact",
+    "prefix": "page",
+    "body": [
+      "import React from \"react\";",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}} = () => {",
+      "  return <>${1:first}</>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}};",
+      ""
+    ]
+  },
+  "typescript component": {
+    "scope": "typescript,typescriptreact",
+    "prefix": "comp",
+    "body": [
+      "import React from \"react\";",
+      "import { cn } from \"@/utils\";",
+      "",
+      "interface Props {",
+      "  className?: string",
+      "  children: React.ReactNode",
+      "};",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}}: React.FC<Props> = ({ className, children }) => {",
+      "  return <div className={cn(\"\", className)}>{children}</div>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}};",
+      ""
+    ]
+  },
+  "javascript component": {
+    "scope": "javascript,javascriptreact",
+    "prefix": "comp",
+    "body": [
+      "import React from \"react\";",
+      "import { cn } from \"@/utils\";",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}} = ({ className, children }) => {",
+      "  return <div className={cn(\"\", className)}>{children}</div>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE/(.)/${1:/upcase}/}};",
+      ""
+    ]
+  }
+}
