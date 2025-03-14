@@ -1,10 +1,10 @@
 import "@/styles/globals.css"
 
-import { Routes } from "@generouted/react-router"
-import { ThemeProvider } from "next-themes"
-import { createRoot } from "react-dom/client"
-import { StrictMode } from "react"
+import Index from "@/pages"
 import { ReactLenis, useLenis } from "lenis/react"
+import { ThemeProvider } from "next-themes"
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
 
 const container = document.getElementById("root")!
 
@@ -20,7 +20,7 @@ const App: React.FC = () => {
     <StrictMode>
       <ReactLenis root>
         <ThemeProvider enableSystem={false} defaultTheme="light">
-          <Routes />
+          <Index />
         </ThemeProvider>
       </ReactLenis>
     </StrictMode>
