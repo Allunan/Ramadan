@@ -15,7 +15,7 @@ void main() {
   if(texColor.a < 0.5) discard;
   vec4 color = texColor;
   float progress = smoothstep(0., vUv.x, uProgress);
-  color.a = mix(0., 1., progress);
+  // color.a = mix(0., 1., progress);
   color.a *= sdfCircle(vUv, 0.5);
   gl_FragColor = color;
   //gl_FragColor = vec4(vec3(color.a), 1.);

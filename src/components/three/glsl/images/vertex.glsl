@@ -86,22 +86,27 @@ void main() {
   // Final position
     vPosition = position;
     vUv = uv;
-    float offset = cnoise(vec3(position.x, position.y, uTime));
-    float progress = smoothstep(0., uv.x, uProgress);
-    //progress = uProgress;
-    // float x = mix( position.x - offset* 5.,  position.x, progress);
-    // float x = position.x - abs(offset) * 5. * (1. - progress);
-    float x = mix(-5., position.x, progress);
-    //x = position.x + uv.x * 2.;
-    float y = position.y + offset * 5. * (1. - progress);
-    //y = position.y + uv.y;
-    vec4 modelPosition = modelMatrix * vec4(x, y, position.z, 1.0);
-    vec4 viewPosition = viewMatrix * modelPosition;
-    gl_Position = projectionMatrix * viewPosition;
+  // Generate noise for randomness
+  float noiseOffset = cnoise(vec3(position.xy * 10.0, uTime * 0.5)); 
+  float startOffset = noiseOffset * 5.0; // Control randomness for x entry
 
-    // Final size
-    gl_PointSize = uSize * uResolution.y ;
-    gl_PointSize *= 1.0 / - viewPosition.z;
+  // Make left side stabilize first by modifying progress based on uv.x
+  float progress = smoothstep(0.0, 1.0, uProgress + (1.0 - uv.x) * 0.5);
+
+  // Move particles from left to right with more control
+  float x = mix(-5.0 + noiseOffset * 2.0, position.x, progress); 
+
+  // Reduce vertical displacement amplitude
+  float y = mix(position.y + noiseOffset * 1.5, position.y, progress); 
+
+  // Apply transformation matrices
+  vec4 modelPosition = modelMatrix * vec4(x, y, position.z, 1.0);
+  vec4 viewPosition = viewMatrix * modelPosition;
+  gl_Position = projectionMatrix * viewPosition;
+
+  // Final size
+  gl_PointSize = uSize * uResolution.y;
+  gl_PointSize *= 1.0 / -viewPosition.z;
 
 
 }
