@@ -1,1 +1,1 @@
-export * from "./three-scene"
+export * from "./three/three-scene"
