@@ -1,5 +1,5 @@
 
-varying float vOpacity;
+varying float vProgress; // Pass progress to the fragment shader
 varying vec3 vPosition;
 varying vec2 vUv;
 uniform float uSize;
@@ -83,30 +83,34 @@ float cnoise(vec3 P){
 }
 
 void main() {
-  // Final position
-    vPosition = position;
-    vUv = uv;
+  vPosition = position;
+  vUv = uv;
+
   // Generate noise for randomness
   float noiseOffset = cnoise(vec3(position.xy * 10.0, uTime * 0.5)); 
-  float startOffset = noiseOffset * 5.0; // Control randomness for x entry
+  float startOffset = noiseOffset * 5.0; 
 
-  // Make left side stabilize first by modifying progress based on uv.x
-  float progress = smoothstep(0.0, 1.0, uProgress + (1.0 - uv.x) * 0.5);
+  // Make left side stabilize first
+  float rawProgress = smoothstep(0.0, 1.0, uProgress + (1.0 - uv.x) * 0.5);
 
-  // Move particles from left to right with more control
-  float x = mix(-5.0 + noiseOffset * 2.0, position.x, progress); 
+  // Apply cubic ease-out for smooth motion
+  vProgress = 1.0 - pow(1.0 - rawProgress, 3.0); 
 
-  // Reduce vertical displacement amplitude
-  float y = mix(position.y + noiseOffset * 1.5, position.y, progress); 
+  // Additional leftward movement when uProgress == 0
+  float leftwardOffset = mix(-5.0 * (1.0 - uv.x), 0.0, uProgress); 
+
+  // Move particles from left to right
+  float x = mix(-5.0 + noiseOffset * 2.0 + leftwardOffset, position.x, vProgress); 
+  float y = mix(position.y + noiseOffset * 1.5, position.y, vProgress); 
+  float z = mix(position.z + noiseOffset * 1.5, position.z, vProgress); 
 
   // Apply transformation matrices
-  vec4 modelPosition = modelMatrix * vec4(x, y, position.z, 1.0);
+  vec4 modelPosition = modelMatrix * vec4(x, y, z, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;
   gl_Position = projectionMatrix * viewPosition;
 
   // Final size
   gl_PointSize = uSize * uResolution.y;
   gl_PointSize *= 1.0 / -viewPosition.z;
-
-
 }
+

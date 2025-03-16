@@ -1,5 +1,6 @@
 import { OrbitControls, useTexture } from "@react-three/drei"
 import { Canvas, useFrame } from "@react-three/fiber"
+import gsap from "gsap"
 import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 
@@ -39,6 +40,15 @@ const TexturedParticles: React.FC<{ customImage: string }> = ({
     setVertexShader(vertexShaderSource)
     setFragmentShader(fragmentShaderSource)
 
+    if (shaderMaterialRef.current) {
+      gsap.to(shaderMaterialRef.current.uniforms.uProgress, {
+        value: 1,
+        delay: 1,
+        duration: 2,
+        ease: "power2.inOut"
+      })
+    }
+
     // Optional: Log when shaders are reloaded
     console.log("Shaders reloaded")
   }, [vertexShaderSource, fragmentShaderSource])
@@ -48,8 +58,6 @@ const TexturedParticles: React.FC<{ customImage: string }> = ({
     if (shaderMaterialRef.current) {
       shaderMaterialRef.current.uniforms.uTime.value =
         state.clock.getElapsedTime()
-      shaderMaterialRef.current.uniforms.uProgress.value =
-        Math.sin(state.clock.getElapsedTime()) * 0.5 + 0.5
     }
   })
 
