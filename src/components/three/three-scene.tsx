@@ -47,6 +47,13 @@ const TexturedParticles: React.FC<{ customImage: string }> = ({
         duration: 2,
         ease: "power2.inOut"
       })
+
+      gsap.to(shaderMaterialRef.current.uniforms.uFadeProgress, {
+        value: 1,
+        delay: 5,
+        duration: 2,
+        ease: "power2.inOut"
+      })
     }
 
     // Optional: Log when shaders are reloaded
@@ -80,7 +87,8 @@ const TexturedParticles: React.FC<{ customImage: string }> = ({
           uImageSize: {
             value: new THREE.Vector2(texture.image.width, texture.image.height)
           },
-          uProgress: { value: 0 }
+          uProgress: { value: 0 },
+          uFadeProgress: { value: 0 }
         }}
       />
     </points>
