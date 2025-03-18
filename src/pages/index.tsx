@@ -3,20 +3,20 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { Image } from "@react-three/drei";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Curve: React.FC<{ progress: number }> = ({ progress }) => {
   const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(5, 0, -5),
-    new THREE.Vector3(0, 0, -10),
-    new THREE.Vector3(-5, 0, -15),
-    new THREE.Vector3(0, 0, -20),
-    new THREE.Vector3(5, 0, -25),
-    new THREE.Vector3(0, 0, -30),
-    new THREE.Vector3(-5, 0, -35),
-    new THREE.Vector3(0, 0, -40),
+    new THREE.Vector3(-10, 0, 0),  // Start from the left
+    new THREE.Vector3(-5, 0, -2),  // Slight depth change
+    new THREE.Vector3(0, 0, -4),   // Centered with more depth
+    new THREE.Vector3(5, 0, -3),   // Moving right with reduced depth
+    new THREE.Vector3(10, 0, -5),  // Further right, deeper
+    new THREE.Vector3(15, 0, -4),  // Slight return towards the camera
+    new THREE.Vector3(20, 0, -6),  // Continue right
+    new THREE.Vector3(25, 0, -5),  // Final movement
   ]);
   const points = curve.getPoints(50);
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -24,9 +24,14 @@ const Curve: React.FC<{ progress: number }> = ({ progress }) => {
   useFrame((state) => {
     const camera = state.camera;
     const point = curve.getPoint(progress);
+
+    // Camera follows the curve
     camera.position.set(point.x, point.y, point.z);
-    camera.lookAt(curve.getPoint(progress + 0.01));
+    
+    // Camera looks slightly ahead (-10 on the Z-axis)
+    camera.lookAt(point.x, point.y, point.z - 10);
   });
+
 
   return (
     <group>
@@ -34,6 +39,30 @@ const Curve: React.FC<{ progress: number }> = ({ progress }) => {
       <line geometry={geometry}>
         <meshBasicMaterial color={"red"} />
       </line>
+      {/* Images placed along the X-axis with subtle depth changes */}
+      <Image position={[-10, 0, 0]} url="test.png" />
+      <Image position={[-9.5, 0, -1.5]} url="test.png" />
+
+      <Image position={[-5, 0, -2]} url="test.png" />
+      <Image position={[-4.5, 0, -3.5]} url="test.png" />
+
+      <Image position={[0, 0, -4]} url="test.png" />
+      <Image position={[0.5, 0, -5.5]} url="test.png" />
+
+      <Image position={[5, 0, -3]} url="test.png" />
+      <Image position={[5.5, 0, -4.5]} url="test.png" />
+
+      <Image position={[10, 0, -5]} url="test.png" />
+      <Image position={[10.5, 0, -6.5]} url="test.png" />
+
+      <Image position={[15, 0, -4]} url="test.png" />
+      <Image position={[15.5, 0, -5.5]} url="test.png" />
+
+      <Image position={[20, 0, -6]} url="test.png" />
+      <Image position={[20.5, 0, -7.5]} url="test.png" />
+
+      <Image position={[25, 0, -5]} url="test.png" />
+      <Image position={[25.5, 0, -6.5]} url="test.png" />
     </group>
   );
 };
