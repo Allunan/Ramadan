@@ -1,11 +1,13 @@
-
 varying float vProgress; // Pass progress to the fragment shader
+varying float vFadeProgress; // Pass fade progress to the fragment shader
 varying vec3 vPosition;
 varying vec2 vUv;
 uniform float uSize;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uProgress;
+uniform float uFadeProgress;
+varying vec4 vColor;
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson (https://github.com/stegu/webgl-noise)
@@ -82,9 +84,118 @@ float cnoise(vec3 P){
   return 2.2 * n_xyz;
 }
 
+
+
+// Utility functions
+#define sat(x) clamp(x, 0., 1.)
+
+float inverseLerp(float v, float minValue, float maxValue) {
+  return (v - minValue) / (maxValue - minValue);
+}
+
+float remap(float v, float inMin, float inMax, float outMin, float outMax) {
+  float t = inverseLerp(v, inMin, inMax);
+  return mix(outMin, outMax, t);
+}
+
+// Hash function for pseudo-random values
+vec2 hash(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+    return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+}
+
+// Perlin-style noise function
+float perlinNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    
+    float a = dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0));
+    float b = dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
+    float c = dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
+    float d = dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));
+    
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// Fractal Brownian Motion (FBM) Noise
+float fbm(vec2 p) {
+    float total = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    
+    for (int i = 0; i < 5; i++) {
+        total += amplitude * perlinNoise(p * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
+    }
+    
+    return total;
+}
+
+// FBM Noise Generator with Scale
+float fmbMaker(vec2 uv, float scale) {
+    vec2 scaledUV = uv * scale;
+    float noise = fbm(scaledUV);
+    return noise;
+}
+
+// SDF Function for Circles
+float sdfCircle(vec2 uv, vec2 center, float radius, float smoothness) {
+    float dist = length(uv - center) - radius;
+    return dist;
+}
+
+
+vec4 movingParticlesUp(){
+  // Get the base texture color
+    vec4 texColor = vec4(1.0, 0.0, 0.0, 1.0);
+    
+    // Initialize with the texture color
+    vec4 color = texColor;
+    
+    // Fade-in based on movement progress
+    float fadeInFactor = smoothstep(0.0, 0.2, vProgress);
+    
+    // Only apply burn effect if fadeProgress is greater than 0
+    if (vFadeProgress > 0.01) {
+        // Normalized coordinates for the burn effect
+        vec2 uv = vUv;
+        vec2 nuv = uv - 0.5;
+        nuv *= 2.0;
+        nuv.x *= uResolution.x / uResolution.y;
+        
+        // Generate FBM noise using the function
+        float noise = fmbMaker(uv, 10.0);
+        
+        // Create multiple circles as masks
+        float time = uTime * 0.5;
+        float mask = 1.0;
+        
+        for (int i = 0; i < 8; i++) {
+            float seed = float(i) + 9.0;
+            vec2 randPos = hash(vec2(seed));
+            
+            // Using vFadeProgress directly to control the transition
+            float t = vFadeProgress;
+            float circle = sdfCircle(nuv + noise, randPos * 2.0, 3.0 * t, 0.1);
+            
+            // Compute minimum for mask
+            mask = min(mask, circle);
+        }
+        
+       
+    mask = smoothstep(.1, 0., (mask));
+    color = vec4(vec3(mask), 1.0);
+    }
+    vColor = color;
+    return color;
+}
+
 void main() {
   vPosition = position;
   vUv = uv;
+  vFadeProgress = uFadeProgress; // Pass the fade progress to the fragment shader
 
   // Generate noise for randomness
   float noiseOffset = cnoise(vec3(position.xy * 10.0, uTime * 0.5)); 
@@ -104,6 +215,8 @@ void main() {
   float y = mix(position.y + noiseOffset * 1.5, position.y, vProgress); 
   float z = mix(position.z + noiseOffset * 1.5, position.z, vProgress); 
 
+  vec4 offsetUp = movingParticlesUp();
+  y = mix(y, y + 1., offsetUp.y);
   // Apply transformation matrices
   vec4 modelPosition = modelMatrix * vec4(x, y, z, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;
