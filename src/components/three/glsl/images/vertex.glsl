@@ -147,49 +147,50 @@ float sdfCircle(vec2 uv, vec2 center, float radius, float smoothness) {
 }
 
 
-vec4 movingParticlesUp(){
+float movingParticlesUp(){
   // Get the base texture color
-    vec4 texColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 texColor = vec4(.0, 0.0, 0.0, 1.0);
     
     // Initialize with the texture color
     vec4 color = texColor;
     
-    // Fade-in based on movement progress
-    float fadeInFactor = smoothstep(0.0, 0.2, vProgress);
     
-    // Only apply burn effect if fadeProgress is greater than 0
-    if (vFadeProgress > 0.01) {
-        // Normalized coordinates for the burn effect
-        vec2 uv = vUv;
-        vec2 nuv = uv - 0.5;
-        nuv *= 2.0;
-        nuv.x *= uResolution.x / uResolution.y;
+    // Normalized coordinates for the burn effect
+    vec2 uv = vUv;
+    vec2 nuv = uv - 0.5;
+    nuv *= 2.0;
+    nuv.x *= uResolution.x / uResolution.y;
+    
+    // Generate FBM noise using the function
+    float noise = fmbMaker(uv, 10.0);
+    
+    // Create multiple circles as masks
+    float time = uTime * 0.5;
+    float mask = 1.0;
+    
+    for (int i = 0; i < 8; i++) {
+        float seed = float(i) + 9.0;
+        vec2 randPos = hash(vec2(seed));
         
-        // Generate FBM noise using the function
-        float noise = fmbMaker(uv, 10.0);
+        // Using vFadeProgress directly to control the transition
+        float t = vFadeProgress;
+        float circle = sdfCircle(nuv + noise, randPos * 2.0, 3.0 * t, 0.1);
         
-        // Create multiple circles as masks
-        float time = uTime * 0.5;
-        float mask = 1.0;
-        
-        for (int i = 0; i < 8; i++) {
-            float seed = float(i) + 9.0;
-            vec2 randPos = hash(vec2(seed));
-            
-            // Using vFadeProgress directly to control the transition
-            float t = vFadeProgress;
-            float circle = sdfCircle(nuv + noise, randPos * 2.0, 3.0 * t, 0.1);
-            
-            // Compute minimum for mask
-            mask = min(mask, circle);
-        }
-        
-       
-    mask = smoothstep(.1, 0., (mask));
-    color = vec4(vec3(mask), 1.0);
+        // Compute minimum for mask
+        mask = min(mask, circle);
     }
+        
+    float up = smoothstep(-.5, 1., (mask));
+    up = pow(up, 0.1);
+    up = 1.0 - up;
+
+    mask = smoothstep(.1, 0., (mask));
+    color = vec4(vec3(mask), .2);
     vColor = color;
-    return color;
+
+    
+
+    return up;
 }
 
 void main() {
@@ -207,6 +208,7 @@ void main() {
   // Apply cubic ease-out for smooth motion
   vProgress = 1.0 - pow(1.0 - rawProgress, 3.0); 
 
+
   // Additional leftward movement when uProgress == 0
   float leftwardOffset = mix(-5.0 * (1.0 - uv.x), 0.0, uProgress); 
 
@@ -215,8 +217,8 @@ void main() {
   float y = mix(position.y + noiseOffset * 1.5, position.y, vProgress); 
   float z = mix(position.z + noiseOffset * 1.5, position.z, vProgress); 
 
-  vec4 offsetUp = movingParticlesUp();
-  y = mix(y, y + 1., offsetUp.y);
+  float offsetUp = movingParticlesUp();
+  // y = mix(y, y + 1., offsetUp);
   // Apply transformation matrices
   vec4 modelPosition = modelMatrix * vec4(x, y, z, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;

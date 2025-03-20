@@ -1,6 +1,7 @@
-import { OrbitControls, useTexture } from "@react-three/drei"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { useControls } from "leva"
+import { OrbitControls, shaderMaterial, useTexture } from "@react-three/drei"
+import { Canvas, extend, useFrame } from "@react-three/fiber"
+import gsap from "gsap"
+import { button, useControls } from "leva"
 import { useEffect, useMemo, useRef, useState } from "react"
 import * as THREE from "three"
 
@@ -8,6 +9,33 @@ import * as THREE from "three"
 // The ?raw suffix tells Vite to import these as strings and enables HMR
 import fragmentShaderSource from "../three/glsl/images/fragment.glsl?raw"
 import vertexShaderSource from "../three/glsl/images/vertex.glsl?raw"
+
+// Declare the material with proper types
+const ParticlesMaterial = shaderMaterial(
+  {
+    uTexture: new THREE.Texture(),
+    uSize: 0.01,
+    uResolution: new THREE.Vector2(1, 1),
+    uTime: 0,
+    uImageSize: new THREE.Vector2(1, 1),
+    uProgress: 0,
+    uFadeProgress: 0
+  },
+  vertexShaderSource,
+  fragmentShaderSource
+)
+
+// Extend THREE with our custom material
+extend({ ParticlesMaterial })
+
+// Add the missing type declaration for the extended JSX elements
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      particlesMaterial: any
+    }
+  }
+}
 
 export const ThreeScene: React.FC = () => {
   // Define Leva controls here at the top level
@@ -64,7 +92,10 @@ const TexturedParticles: React.FC<{
 
   // Create image size vector once
   const imageSize = useMemo(() => {
-    return new THREE.Vector2(texture.image.width, texture.image.height)
+    if (texture && texture.image) {
+      return new THREE.Vector2(texture.image.width, texture.image.height)
+    }
+    return new THREE.Vector2(1, 1)
   }, [texture])
 
   // Create refs to store the current control values
@@ -81,7 +112,7 @@ const TexturedParticles: React.FC<{
   // Leva controls
   const controls = useControls({
     progress: {
-      value: 0,
+      value: 1,
       min: 0,
       max: 1,
       step: 0.01,
@@ -91,7 +122,7 @@ const TexturedParticles: React.FC<{
       }
     },
     fadeProgress: {
-      value: 0,
+      value: 0.1,
       min: 0,
       max: 1,
       step: 0.01,
@@ -99,36 +130,61 @@ const TexturedParticles: React.FC<{
       onChange: (value) => {
         fadeProgressRef.current = value
       }
-    }
+    },
+    "Animate In": button(() => {
+      if (shaderMaterialRef.current) {
+        gsap.to(progressRef, {
+          current: 1,
+          duration: 2,
+          ease: "power2.inOut",
+          onUpdate: () => {
+            // Update the Leva control UI
+            if (controls && typeof controls.progress !== 'undefined') {
+              controls.progress = progressRef.current
+            }
+          }
+        })
+      }
+    }),
+    "Burn Effect": button(() => {
+      if (shaderMaterialRef.current) {
+        gsap.to(fadeProgressRef, {
+          current: 1,
+          duration: 2,
+          ease: "power2.inOut",
+          onUpdate: () => {
+            // Update the Leva control UI
+            if (controls && typeof controls.fadeProgress !== 'undefined') {
+              controls.fadeProgress = fadeProgressRef.current
+            }
+          }
+        })
+      }
+    })
   }) as ControlsType
 
   // Initialize our refs from the initial control values
   useEffect(() => {
     // Set initial values from controls
-    progressRef.current = controls.progress
-    fadeProgressRef.current = controls.fadeProgress
-  }, [])
+    if (controls) {
+      progressRef.current = controls.progress || 0
+      fadeProgressRef.current = controls.fadeProgress || 0
+    }
+  }, [controls])
 
-  // Set up hot module replacement for shaders
+  // Initialize the shader material with default values
   useEffect(() => {
-    // This effect will run when the imported shader modules change
-    setVertexShader(vertexShaderSource)
-    setFragmentShader(fragmentShaderSource)
-
-    // Optional: Log when shaders are reloaded
-    console.log("Shaders reloaded")
-  }, [vertexShaderSource, fragmentShaderSource])
-
-  // Pre-create the uniforms object to avoid recreating it on each render
-  const uniforms = useMemo(() => {
-    return {
-      uTexture: { value: texture },
-      uSize: { value: 0.01 },
-      uResolution: { value: resolution },
-      uTime: { value: 0 },
-      uImageSize: { value: imageSize },
-      uProgress: { value: 0 },
-      uFadeProgress: { value: 0 }
+    if (shaderMaterialRef.current && texture) {
+      // Initialize all uniforms with safe values
+      shaderMaterialRef.current.uniforms = {
+        uTexture: { value: texture },
+        uSize: { value: 0.01 },
+        uResolution: { value: resolution },
+        uTime: { value: 0 },
+        uImageSize: { value: imageSize },
+        uProgress: { value: progressRef.current },
+        uFadeProgress: { value: fadeProgressRef.current }
+      }
     }
   }, [texture, resolution, imageSize])
 
@@ -138,7 +194,7 @@ const TexturedParticles: React.FC<{
 
     // Update time uniform at 30fps
     if (currentTime - lastUpdateTimeRef.current > 0.033) {
-      if (shaderMaterialRef.current) {
+      if (shaderMaterialRef.current?.uniforms) {
         shaderMaterialRef.current.uniforms.uTime.value = currentTime
       }
       lastUpdateTimeRef.current = currentTime
@@ -146,11 +202,10 @@ const TexturedParticles: React.FC<{
 
     // Update control values less frequently to avoid freezing
     if (currentTime - lastControlUpdateTimeRef.current > 0.1) {
-      if (shaderMaterialRef.current) {
-        // Only update if values have changed
+      if (shaderMaterialRef.current?.uniforms) {
+        // Only update if values have changed and refs exist
         shaderMaterialRef.current.uniforms.uProgress.value = progressRef.current
-        shaderMaterialRef.current.uniforms.uFadeProgress.value =
-          fadeProgressRef.current
+        shaderMaterialRef.current.uniforms.uFadeProgress.value = fadeProgressRef.current
       }
       lastControlUpdateTimeRef.current = currentTime
     }
@@ -158,15 +213,11 @@ const TexturedParticles: React.FC<{
 
   return (
     <points>
-      <planeGeometry args={[2 * ratio, 2, ratio * 300, 300]} />{" "}
-      {/* Reduced resolution for better performance */}
-      <shaderMaterial
-        ref={shaderMaterialRef}
-        key={`${vertexShader.length}-${fragmentShader.length}`} // Force re-creation when shaders change
-        fragmentShader={fragmentShader}
-        vertexShader={vertexShader}
-        transparent
-        uniforms={uniforms}
+      <planeGeometry args={[2 * ratio, 2, ratio * 300, 300]} />
+      <particlesMaterial 
+        ref={shaderMaterialRef} 
+        transparent 
+        key={ParticlesMaterial.key} 
       />
     </points>
   )
