@@ -1,13 +1,96 @@
-varying float vProgress; // Pass progress to the fragment shader
-varying float vFadeProgress; // Pass fade progress to the fragment shader
+varying float vProgress; 
+varying float vFadeProgress; 
 varying vec3 vPosition;
 varying vec2 vUv;
+varying float vMask;
 uniform float uSize;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uProgress;
 uniform float uFadeProgress;
 varying vec4 vColor;
+
+#define sat(x) clamp(x, 0., 1.)
+#define PI 3.141590
+
+float inverseLerp(float v, float minValue, float maxValue) {
+  return (v - minValue) / (maxValue - minValue);
+}
+
+float remap(float v, float inMin, float inMax, float outMin, float outMax) {
+  float t = inverseLerp(v, inMin, inMax);
+  return mix(outMin, outMax, t);
+}
+
+vec2 hash(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+    return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+}
+
+float perlinNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    
+    float a = dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0));
+    float b = dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
+    float c = dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
+    float d = dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));
+    
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// Fractal Brownian Motion (FBM) Noise
+float fbm(vec2 p) {
+    float total = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    
+    for (int i = 0; i < 5; i++) {
+        total += amplitude * perlinNoise(p * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
+    }
+    
+    return total;
+}
+
+float fmbMaker(vec2 uv, float scale) {
+    vec2 scaledUV = uv * scale;
+    float noise = fbm(scaledUV);
+    
+    
+    return noise;
+}
+
+float sdfCircle(vec2 uv, vec2 center, float radius) {
+    float dist = length(uv - center) - radius;
+    return dist;
+}
+
+float burnEffect(){
+    
+    
+    float uScale = 10.0;         
+    
+    float noise = fmbMaker(uv, uScale);
+
+    float time = uFadeProgress * 2.;
+    float mask = 1.;
+    
+    for (float i = 0.; i < 8.; i++){
+        float seed = i + 9.;
+        vec2 hash = hash(vec2(seed));
+        float t = (sin(time + PI * 1.5)) * 0.5 + 0.5;
+        t*=1.1;
+        float circle = sdfCircle(uv + noise , hash * 2.,  3. * (-.3+t) );
+        mask = min(mask, circle);
+
+    }
+    
+    
+    return mask;
+}
 
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson (https://github.com/stegu/webgl-noise)
@@ -84,141 +167,29 @@ float cnoise(vec3 P){
   return 2.2 * n_xyz;
 }
 
-
-
-// Utility functions
-#define sat(x) clamp(x, 0., 1.)
-
-float inverseLerp(float v, float minValue, float maxValue) {
-  return (v - minValue) / (maxValue - minValue);
-}
-
-float remap(float v, float inMin, float inMax, float outMin, float outMax) {
-  float t = inverseLerp(v, inMin, inMax);
-  return mix(outMin, outMax, t);
-}
-
-// Hash function for pseudo-random values
-vec2 hash(vec2 p) {
-    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-    return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-}
-
-// Perlin-style noise function
-float perlinNoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    
-    float a = dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0));
-    float b = dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
-    float c = dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
-    float d = dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));
-    
-    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-}
-
-// Fractal Brownian Motion (FBM) Noise
-float fbm(vec2 p) {
-    float total = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-    
-    for (int i = 0; i < 5; i++) {
-        total += amplitude * perlinNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    
-    return total;
-}
-
-// FBM Noise Generator with Scale
-float fmbMaker(vec2 uv, float scale) {
-    vec2 scaledUV = uv * scale;
-    float noise = fbm(scaledUV);
-    return noise;
-}
-
-// SDF Function for Circles
-float sdfCircle(vec2 uv, vec2 center, float radius, float smoothness) {
-    float dist = length(uv - center) - radius;
-    return dist;
-}
-
-
-float movingParticlesUp(){
-  // Get the base texture color
-    vec4 texColor = vec4(.0, 0.0, 0.0, 1.0);
-    
-    // Initialize with the texture color
-    vec4 color = texColor;
-    
-    
-    // Normalized coordinates for the burn effect
-    vec2 uv = vUv;
-    vec2 nuv = uv - 0.5;
-    nuv *= 2.0;
-    nuv.x *= uResolution.x / uResolution.y;
-    
-    // Generate FBM noise using the function
-    float noise = fmbMaker(uv, 10.0);
-    
-    // Create multiple circles as masks
-    float time = uTime * 0.5;
-    float mask = 1.0;
-    
-    for (int i = 0; i < 8; i++) {
-        float seed = float(i) + 9.0;
-        vec2 randPos = hash(vec2(seed));
-        
-        // Using vFadeProgress directly to control the transition
-        float t = vFadeProgress;
-        float circle = sdfCircle(nuv + noise, randPos * 2.0, 3.0 * t, 0.1);
-        
-        // Compute minimum for mask
-        mask = min(mask, circle);
-    }
-        
-    float up = smoothstep(-.5, 1., (mask));
-    up = pow(up, 0.1);
-    up = 1.0 - up;
-
-    mask = smoothstep(.1, 0., (mask));
-    color = vec4(vec3(mask), .2);
-    vColor = color;
-
-    
-
-    return up;
-}
-
 void main() {
   vPosition = position;
   vUv = uv;
-  vFadeProgress = uFadeProgress; // Pass the fade progress to the fragment shader
+  vFadeProgress = uFadeProgress;
+  vProgress = uProgress;
 
-  // Generate noise for randomness
   float noiseOffset = cnoise(vec3(position.xy * 10.0, uTime * 0.5)); 
-  float startOffset = noiseOffset * 5.0; 
 
-  // Make left side stabilize first
-  float rawProgress = smoothstep(0.0, 1.0, uProgress + (1.0 - uv.x) * 0.5);
-
-  // Apply cubic ease-out for smooth motion
-  vProgress = 1.0 - pow(1.0 - rawProgress, 3.0); 
-
-
-  // Additional leftward movement when uProgress == 0
   float leftwardOffset = mix(-5.0 * (1.0 - uv.x), 0.0, uProgress); 
 
-  // Move particles from left to right
   float x = mix(-5.0 + noiseOffset * 2.0 + leftwardOffset, position.x, vProgress); 
   float y = mix(position.y + noiseOffset * 1.5, position.y, vProgress); 
   float z = mix(position.z + noiseOffset * 1.5, position.z, vProgress); 
 
-  float offsetUp = movingParticlesUp();
-  // y = mix(y, y + 1., offsetUp);
+  float mask = burnEffect();
+  vMask = mask;
+  float up = smoothstep(-.5, 1., (mask));
+  up = pow(up, 0.1);
+  float glowAmount = smoothstep(0.0, .2, abs(mask));
+            glowAmount = 1.0 - pow(glowAmount, 0.01);
+  up = 1. - up;
+  up = glowAmount ;
+  y = mix(y, y + 1., up);
   // Apply transformation matrices
   vec4 modelPosition = modelMatrix * vec4(x, y, z, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;

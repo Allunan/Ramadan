@@ -10,6 +10,7 @@ varying vec2 vUv;
 varying float vProgress;       // Position progress
 varying float vFadeProgress;   // Separate fade-out progress
 varying vec4 vColor;
+varying float vMask;
 
 // Utility functions
 #define sat(x) clamp(x, 0., 1.)
@@ -107,6 +108,8 @@ void main() {
             // Compute minimum for mask
             mask = min(mask, circle);
         }
+
+        mask = vMask;
         
         // Skip expensive operations if mask is too large
         if (mask < 0.5) {
