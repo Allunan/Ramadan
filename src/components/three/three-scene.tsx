@@ -7,6 +7,9 @@ import * as THREE from "three"
 
 // Dynamic shader imports for hot reloading
 // The ?raw suffix tells Vite to import these as strings and enables HMR
+import Background from "@/components/three/background"
+import Chapter1 from "@/components/three/chapter1"
+import Foreground from "@/components/three/foreground"
 import fragmentShaderSource from "../three/glsl/images/fragment.glsl?raw"
 import vertexShaderSource from "../three/glsl/images/vertex.glsl?raw"
 
@@ -48,14 +51,17 @@ export const ThreeScene: React.FC = () => {
 
   return (
     <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 5], fov: 50 }}>
+      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 2], fov: 35 }}>
         <color attach="background" args={["#050505"]} />
         <OrbitControls />
         <ambientLight intensity={1} />
-        <TexturedParticles
+        {/* <TexturedParticles
           customImage={"/test.png"}
           showControls={showControls}
-        />
+        /> */}
+        <Foreground />
+        <Background />
+        <Chapter1 />
         {/* <Curve /> */}
       </Canvas>
     </div>
