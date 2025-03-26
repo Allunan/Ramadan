@@ -1,2 +1,2 @@
-export * from "./base"
-export * from "./spacing"
+export * from "./base";
+export * from "./spacing";

@@ -1,87 +1,87 @@
-import { base } from "./base"
+import { base } from "./base";
 
 /**
  * Generate Tailwind width values based on a given screen type.
  */
 export const width = () => {
-  const width: Record<string, string> = {}
+	const width: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    width[`span-w-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
+	for (let value = 1; value <= 12; value++) {
+		width[`span-w-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
 
-  return width
-}
+	return width;
+};
 
 /**
  * Generate Tailwind min-width values based on CSS variables.
  */
 export const minWidth = () => {
-  const minWidth: Record<string, string> = {}
+	const minWidth: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    minWidth[`span-min-w-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
+	for (let value = 1; value <= 12; value++) {
+		minWidth[`span-min-w-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
 
-  return minWidth
-}
+	return minWidth;
+};
 
 /**
  * Generate Tailwind max-width values based on CSS variables.
  */
 export const maxWidth = () => {
-  const maxWidth: Record<string, string> = {}
+	const maxWidth: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    maxWidth[`span-max-w-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
+	for (let value = 1; value <= 12; value++) {
+		maxWidth[`span-max-w-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
 
-  return maxWidth
-}
+	return maxWidth;
+};
 
 /**
  * Generate Tailwind height values based on CSS variables.
  */
 export const height = () => {
-  const height: Record<string, string> = {}
+	const height: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    height[`span-h-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
+	for (let value = 1; value <= 12; value++) {
+		height[`span-h-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
 
-  return height
-}
+	return height;
+};
 
 /**
  * Generate Tailwind min-height values based on CSS variables.
  */
 export const minHeight = () => {
-  const minHeight: Record<string, string> = {}
+	const minHeight: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    minHeight[`span-min-h-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
+	for (let value = 1; value <= 12; value++) {
+		minHeight[`span-min-h-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
 
-  return minHeight
-}
+	return minHeight;
+};
 
 /**
  * Generate Tailwind max-height values based on CSS variables.
  */
 export const maxHeight = () => {
-  const maxHeight: Record<string, string> = {}
+	const maxHeight: Record<string, string> = {};
 
-  for (let value = 1; value <= 12; value++) {
-    maxHeight[`span-max-h-${value}`] =
-      `calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`
-  }
-  return maxHeight
-}
+	for (let value = 1; value <= 12; value++) {
+		maxHeight[`span-max-h-${value}`] =
+			`calc(${value} * ${base.span} + (${value} - 1) * var(--grid-gap))`;
+	}
+	return maxHeight;
+};
 /**
  * This object can then be used to extend tailwinds `gap`.
  *
@@ -92,14 +92,14 @@ export const maxHeight = () => {
  *
  */
 export const gap = () => {
-  const gap: Record<string, string> = {}
+	const gap: Record<string, string> = {};
 
-  for (let value = 1; value <= 64; value++) {
-    gap[`base-${value}`] = `${base.spacing * value}px`
-  }
+	for (let value = 1; value <= 64; value++) {
+		gap[`base-${value}`] = `${base.spacing * value}px`;
+	}
 
-  return gap
-}
+	return gap;
+};
 
 /**
  * This object can then be used to extend tailwinds `padding`.
@@ -112,14 +112,14 @@ export const gap = () => {
  *
  */
 export const padding = () => {
-  const padding: Record<string, string> = {}
+	const padding: Record<string, string> = {};
 
-  for (let value = 1; value <= 64; value++) {
-    padding[`base-${value}`] = `${base.spacing * value}px`
-  }
+	for (let value = 1; value <= 64; value++) {
+		padding[`base-${value}`] = `${base.spacing * value}px`;
+	}
 
-  return padding
-}
+	return padding;
+};
 
 /**
  * This object can then be used to extend tailwinds `margin`.
@@ -132,11 +132,11 @@ export const padding = () => {
  *
  */
 export const margin = () => {
-  const margin: Record<string, string> = {}
+	const margin: Record<string, string> = {};
 
-  for (let value = 1; value <= 64; value++) {
-    margin[`base-${value}`] = `${base.spacing * value}px`
-  }
+	for (let value = 1; value <= 64; value++) {
+		margin[`base-${value}`] = `${base.spacing * value}px`;
+	}
 
-  return margin
-}
+	return margin;
+};
