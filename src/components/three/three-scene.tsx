@@ -35,7 +35,7 @@ extend({ ParticlesMaterial })
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      particlesMaterial: any
+      particlesMaterial: unknown
     }
   }
 }
@@ -98,7 +98,7 @@ const TexturedParticles: React.FC<{
 
   // Create image size vector once
   const imageSize = useMemo(() => {
-    if (texture && texture.image) {
+    if (texture?.image) {
       return new THREE.Vector2(texture.image.width, texture.image.height)
     }
     return new THREE.Vector2(1, 1)
@@ -112,7 +112,7 @@ const TexturedParticles: React.FC<{
   type ControlsType = {
     progress: number
     fadeProgress: number
-    [key: string]: any
+    [key: string]: unknown
   }
 
   // Leva controls
@@ -145,7 +145,7 @@ const TexturedParticles: React.FC<{
           ease: "power2.inOut",
           onUpdate: () => {
             // Update the Leva control UI
-            if (controls && typeof controls.progress !== 'undefined') {
+            if (controls && typeof controls.progress !== "undefined") {
               controls.progress = progressRef.current
             }
           }
@@ -160,7 +160,7 @@ const TexturedParticles: React.FC<{
           ease: "power2.inOut",
           onUpdate: () => {
             // Update the Leva control UI
-            if (controls && typeof controls.fadeProgress !== 'undefined') {
+            if (controls && typeof controls.fadeProgress !== "undefined") {
               controls.fadeProgress = fadeProgressRef.current
             }
           }
@@ -211,7 +211,8 @@ const TexturedParticles: React.FC<{
       if (shaderMaterialRef.current?.uniforms) {
         // Only update if values have changed and refs exist
         shaderMaterialRef.current.uniforms.uProgress.value = progressRef.current
-        shaderMaterialRef.current.uniforms.uFadeProgress.value = fadeProgressRef.current
+        shaderMaterialRef.current.uniforms.uFadeProgress.value =
+          fadeProgressRef.current
       }
       lastControlUpdateTimeRef.current = currentTime
     }
@@ -220,10 +221,10 @@ const TexturedParticles: React.FC<{
   return (
     <points>
       <planeGeometry args={[2 * ratio, 2, ratio * 300, 300]} />
-      <particlesMaterial 
-        ref={shaderMaterialRef} 
-        transparent 
-        key={ParticlesMaterial.key} 
+      <particlesMaterial
+        ref={shaderMaterialRef}
+        transparent
+        key={ParticlesMaterial.key}
       />
     </points>
   )

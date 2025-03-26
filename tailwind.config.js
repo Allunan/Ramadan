@@ -1,14 +1,14 @@
 import {
-  width,
-  minWidth,
-  maxWidth,
-  height,
-  minHeight,
-  maxHeight,
   gap,
-  padding,
+  height,
   margin,
-  tailwindCSSVars
+  maxHeight,
+  maxWidth,
+  minHeight,
+  minWidth,
+  padding,
+  tailwindCSSVars,
+  width
 } from "./src/lib/tailwindcss/index.ts"
 
 export default {
