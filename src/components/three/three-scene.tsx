@@ -1,4 +1,4 @@
-import { OrbitControls, shaderMaterial, useTexture } from "@react-three/drei"
+import { shaderMaterial, useTexture } from "@react-three/drei"
 import { Canvas, extend, useFrame } from "@react-three/fiber"
 import gsap from "gsap"
 import { button, useControls } from "leva"
@@ -7,7 +7,7 @@ import * as THREE from "three"
 
 // Dynamic shader imports for hot reloading
 // The ?raw suffix tells Vite to import these as strings and enables HMR
-import Chapter4 from "@/components/three/chapter4"
+import Chapter1 from "@/components/three/chapter1"
 import Foreground from "@/components/three/foreground"
 import fragmentShaderSource from "../three/glsl/images/fragment.glsl?raw"
 import vertexShaderSource from "../three/glsl/images/vertex.glsl?raw"
@@ -39,91 +39,27 @@ declare global {
   }
 }
 
-export const ThreeScene: React.FC = () => {
-  const [color, setColor] = useState("#9ca3af")
-  const [showChapter1, setShowChapter1] = useState(true)
-  const [showChapter2, setShowChapter2] = useState(false)
-  const [showChapter3, setShowChapter3] = useState(false)
-
-  // Define Leva controls here at the top level
-  const { showControls } = useControls({
-    showControls: {
-      value: true,
-      label: "Show Controls"
-    }
-  })
-
-  const controls = useControls({
-    color: {
-      value: "#9ca3af",
-      label: "Background Color",
-      onChange: (value) => {
-        setColor(value)
-      }
-    }
-  })
-
-  const controlChapters = useControls<{ showChapter1: boolean }, any, any>({
-    showChapter1: {
-      value: showChapter1,
-      label: "Chapter 1",
-      onChange: () => {
-        setShowChapter1(true)
-        setShowChapter2(false)
-        setShowChapter3(false)
-        controlChapters2.entries?.showChapter2.setValue(false)
-        controlChapters3.entries?.showChapter3.setValue(false)
-      }
-    }
-  })
-  const controlChapters2 = useControls<{ showChapter2: boolean }, any, any>({
-    showChapter2: {
-      value: showChapter2,
-      label: "Chapter 2",
-      onChange: () => {
-        setShowChapter1(false)
-        setShowChapter2(true)
-        setShowChapter3(false)
-        controlChapters.entries?.showChapter1.setValue(false)
-        controlChapters3.entries?.showChapter3.setValue(false)
-      }
-    }
-  })
-  const controlChapters3 = useControls<{ showChapter3: boolean }, any, any>({
-    showChapter3: {
-      value: showChapter3,
-      label: "Chapter 3",
-      onChange: () => {
-        setShowChapter1(false)
-        setShowChapter2(false)
-        setShowChapter3(true)
-        controlChapters.entries?.showChapter1.setValue(false)
-        controlChapters2.entries?.showChapter2.setValue(false)
-      }
-    }
-  })
+export const ThreeScene: React.FC<{
+  container: React.RefObject<HTMLDivElement>
+}> = ({ container }) => {
   return (
     <div
       style={{ width: "100%", height: "100vh", position: "relative" }}
       color="#9ca3af">
       <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 2], fov: 35 }}>
-        <color attach="background" args={[color]} />
-        <OrbitControls />
+        <color attach="background" args={["#9ca3af"]} />
         <ambientLight intensity={1} />
+        {/* <OrbitControls /> */}
         {/* <TexturedParticles
           customImage={"/test.png"}
           showControls={showControls}
         /> */}
         <Foreground />
         {/* <Background /> */}
-        {/* {showChapter1 ? (
-          <Chapter1 />
-        ) : showChapter2 ? (
-          <Chapter2 />
-        ) : showChapter3 ? (
-          <Chapter3 />
-        ) : null} */}
-        <Chapter4 />
+        <Chapter1 container={container} />
+        {/* {showChapter2 && <Chapter2 />}
+        {showChapter3 && <Chapter3 />}
+        {showChapter4 && <Chapter4 />} */}
 
         {/* <Curve /> */}
       </Canvas>

@@ -3,10 +3,11 @@ import { useMemo } from "react"
 import * as THREE from "three"
 
 const Chapter4 = () => {
-  const army = useTexture("/textures/Chapter-4/army.png")
-  const armyMarching2 = useTexture("/textures/Chapter-4/soldiers-marching.png")
-  const soldiers = useTexture("/textures/Chapter-4/soldiers.png")
-  const entringMaka = useTexture("/textures/Chapter-4/entring1.png")
+  const army = useTexture("/textures/chapter-4/army.png")
+  console.log(army)
+  const armyMarching2 = useTexture("/textures/chapter-4/soldiers-marching.png")
+  const soldiers = useTexture("/textures/chapter-4/soldiers.png")
+  const entringMaka = useTexture("/textures/chapter-4/entring1.png")
 
   const soldierGeometry = useMemo(() => new THREE.PlaneGeometry(1, 1), [])
   const geometry = useMemo(() => new THREE.PlaneGeometry(3, 2), [])
@@ -59,9 +60,9 @@ const Chapter4 = () => {
   )
 
   return (
-    <group position={[0, 0.3, 1.5]}>
+    <group position={[0, 0.2, 1.5]} scale={[0.5, 0.5, 0.5]}>
       {/* army marching */}
-      {/* <group position={[0, 0, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh
           // rotation-y={Math.PI}
           rotation={[0, 0.2, 5 * (Math.PI / 180)]}
@@ -83,16 +84,16 @@ const Chapter4 = () => {
             position={[0.3, -0.2, -1]}
           />
         </group>
-      </group> */}
+      </group>
       {/* entring maka */}
-      <group position={[0, 0, 0]}>
+      {/* <group position={[0, 0, 0]}>
         <mesh
           // rotation-y={Math.PI}
           geometry={geometry}
           material={entringMakaMaterial}
           position={[0.2, -0.25, -2.5]}
         />
-      </group>
+      </group> */}
     </group>
   )
 }
