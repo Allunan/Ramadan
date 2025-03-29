@@ -4,8 +4,9 @@ import { useFrame } from "@react-three/fiber"
 import gsap from "gsap"
 import { useMemo } from "react"
 import * as THREE from "three"
-import fragmentShader from "../../glsl/particles/fragment.glsl"
-import vertexShader from "../../glsl/particles/vertex.glsl"
+import fragmentShader from "../../glsl/burn/fragment.glsl"
+import vertexShader from "../../glsl/burn/vertex.glsl"
+
 interface Part3Props {
   container: React.RefObject<HTMLDivElement>
 }
@@ -24,13 +25,17 @@ const Part3 = ({ container }: Part3Props) => {
     const ratio = texture.image.width / texture.image.height
 
     const vertices = []
+    const uvs = []
     for (let i = 0; i < nbLines; i++) {
       for (let j = 0; j < nbColumns; j++) {
         vertices.push(...[i, j, 0])
+        uvs.push(...[i / nbLines, j / nbColumns])
       }
     }
     const positions = new Float32Array(vertices)
+    const uvsArray = new Float32Array(uvs)
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute("uv", new THREE.BufferAttribute(uvsArray, 2))
     geometry.center()
     return geometry
   }
@@ -139,6 +144,18 @@ const Part3 = ({ container }: Part3Props) => {
     birdsMaterial.uniforms.uTime.value = state.clock.elapsedTime
   })
 
+  // useControls({
+  //   progress: {
+  //     value: 0,
+  //     min: 0,
+  //     max: 1,
+  //     step: 0.01,
+  //     onChange: (value) => {
+  //       negotiationMaterial.uniforms.uOutProgress.value = value
+  //     }
+  //   }
+  // })
+
   // Set up animation timeline
   useGSAP(() => {
     if (container.current) {
@@ -147,7 +164,6 @@ const Part3 = ({ container }: Part3Props) => {
           trigger: container.current,
           start: "31% top",
           end: "40% top",
-          markers: true,
           toggleActions: "play none none reverse"
         }
       })
@@ -193,18 +209,18 @@ const Part3 = ({ container }: Part3Props) => {
       tlOut
         .to(
           negotiationMaterial.uniforms.uOutProgress,
-          { value: 1, duration: 1, ease: "power2.inOut" },
+          { value: 1, duration: 3, ease: "power2.inOut" },
           "<"
         )
         .to(
           palmMaterial.uniforms.uOutProgress,
-          { value: 1, duration: 1, ease: "power2.inOut" },
-          "<"
+          { value: 1, duration: 3, ease: "power2.inOut" },
+          ""
         )
         .to(
           birdsMaterial.uniforms.uOutProgress,
-          { value: 1, duration: 1, ease: "power2.inOut" },
-          "<"
+          { value: 1, duration: 3, ease: "power2.inOut" },
+          ""
         )
     }
   }, [container])
