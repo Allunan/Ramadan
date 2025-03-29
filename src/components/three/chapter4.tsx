@@ -4,7 +4,6 @@ import * as THREE from "three"
 
 const Chapter4 = () => {
   const army = useTexture("/textures/chapter-4/army.png")
-  console.log(army)
   const armyMarching2 = useTexture("/textures/chapter-4/soldiers-marching.png")
   const soldiers = useTexture("/textures/chapter-4/soldiers.png")
   const entringMaka = useTexture("/textures/chapter-4/entring1.png")

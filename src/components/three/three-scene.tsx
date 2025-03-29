@@ -1,3 +1,5 @@
+import { Chapter1, Chapter2 } from "@/components/three/chapters"
+import Foreground from "@/components/three/foreground"
 import { shaderMaterial, useTexture } from "@react-three/drei"
 import { Canvas, extend, useFrame } from "@react-three/fiber"
 import gsap from "gsap"
@@ -7,9 +9,6 @@ import * as THREE from "three"
 
 // Dynamic shader imports for hot reloading
 // The ?raw suffix tells Vite to import these as strings and enables HMR
-import Chapter1 from "@/components/three/chapter1"
-import Chapter2 from "@/components/three/chapter2"
-import Foreground from "@/components/three/foreground"
 import fragmentShaderSource from "../three/glsl/images/fragment.glsl?raw"
 import vertexShaderSource from "../three/glsl/images/vertex.glsl?raw"
 

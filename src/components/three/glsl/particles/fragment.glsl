@@ -2,7 +2,7 @@ uniform sampler2D uTexture;
 uniform vec2 uImageSize;
 uniform vec2 uResolution;
 uniform float uInProgress;
-uniform float uFadeProgress; // Controls the burn transition
+uniform float uOutProgress; // Controls the burn transition
 uniform float uTime;
 uniform float uNbLines;
 uniform float uNbColumns;
@@ -35,8 +35,9 @@ void main() {
     circle = smoothstep(0.2, 0.0, circle);
 
     float visible = smoothstep(0., 0.2, uInProgress);
+    float visibleOut = 1. - uOutProgress;
 
     gl_FragColor = textureFinal;
-    gl_FragColor.a *= circle * visible;
+    gl_FragColor.a *= circle * visible * visibleOut;
 
 }

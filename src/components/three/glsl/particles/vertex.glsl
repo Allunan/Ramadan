@@ -6,6 +6,7 @@ uniform float uSize;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uInProgress;
+uniform float uOutProgress;
 
 #define sat(x) clamp(x, 0., 1.)
 #define PI 3.14159265358979323846
@@ -77,6 +78,10 @@ void main() {
   // Interpolate back to original position based on progress
   x = mix(x, position.x, uInProgress);
   y = mix(y, position.y, uInProgress);
+
+  float yOut = y - noise(vec3(position.x, position.y, 0)) * 100.;
+
+  y = mix(y, yOut, uOutProgress);
   
   vec4 modelPosition = modelMatrix * vec4(x, y, position.z, 1.0);
   vec4 viewPosition = viewMatrix * modelPosition;
