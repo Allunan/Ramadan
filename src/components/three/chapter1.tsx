@@ -112,7 +112,6 @@ const Chapter1: React.FC<{ container: React.RefObject<HTMLDivElement> }> = ({
         trigger: container.current,
         start: "top top",
         end: "10% top",
-        markers: true,
         toggleActions: "play none reverse none",
         scrub: 1,
         onEnter: () => {
@@ -129,7 +128,6 @@ const Chapter1: React.FC<{ container: React.RefObject<HTMLDivElement> }> = ({
         trigger: container.current,
         start: "10% top",
         end: "9% top",
-        markers: true,
         toggleActions: "play none reverse none",
         onEnter: () => {
           if (

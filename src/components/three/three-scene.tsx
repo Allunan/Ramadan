@@ -8,6 +8,7 @@ import * as THREE from "three"
 // Dynamic shader imports for hot reloading
 // The ?raw suffix tells Vite to import these as strings and enables HMR
 import Chapter1 from "@/components/three/chapter1"
+import Chapter2 from "@/components/three/chapter2"
 import Foreground from "@/components/three/foreground"
 import fragmentShaderSource from "../three/glsl/images/fragment.glsl?raw"
 import vertexShaderSource from "../three/glsl/images/vertex.glsl?raw"
@@ -49,7 +50,6 @@ export const ThreeScene: React.FC<{
       <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 2], fov: 35 }}>
         <color attach="background" args={["#9ca3af"]} />
         <ambientLight intensity={1} />
-        {/* <OrbitControls /> */}
         {/* <TexturedParticles
           customImage={"/test.png"}
           showControls={showControls}
@@ -57,6 +57,7 @@ export const ThreeScene: React.FC<{
         <Foreground />
         {/* <Background /> */}
         <Chapter1 container={container} />
+        <Chapter2 container={container} />
         {/* {showChapter2 && <Chapter2 />}
         {showChapter3 && <Chapter3 />}
         {showChapter4 && <Chapter4 />} */}
@@ -65,12 +66,6 @@ export const ThreeScene: React.FC<{
       </Canvas>
     </div>
   )
-}
-
-// Define an interface for our controls
-interface ShaderControls {
-  progress: number
-  fadeProgress: number
 }
 
 const TexturedParticles: React.FC<{
@@ -226,40 +221,5 @@ const TexturedParticles: React.FC<{
         key={ParticlesMaterial.key}
       />
     </points>
-  )
-}
-
-const Curve: React.FC = () => {
-  const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-5, 0, 0),
-    new THREE.Vector3(0, 0, 5),
-    new THREE.Vector3(5, 0, 0)
-  ])
-
-  const points = curve.getPoints(100)
-  const geometry = new THREE.BufferGeometry().setFromPoints(points)
-
-  useFrame((state) => {
-    const camera = state.camera
-    const progress = Math.sin(state.clock.elapsedTime) * 0.5 + 0.5
-    const point = curve.getPoint(progress)
-    // camera.position.set(point.x, point.y, point.z)
-    // camera.lookAt(curve.getPoint(progress + 0.01))
-  })
-  return (
-    <group>
-      <axesHelper args={[4]} />
-      <lineSegments>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={geometry.getAttribute("position").array}
-            count={geometry.getAttribute("position").count}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="red" />
-      </lineSegments>
-    </group>
   )
 }
