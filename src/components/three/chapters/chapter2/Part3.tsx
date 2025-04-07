@@ -201,7 +201,6 @@ const Part3 = ({ container }: Part3Props) => {
           trigger: container.current,
           start: "40% top",
           end: "41% top",
-          markers: true,
           toggleActions: "play none none reverse"
         }
       })
@@ -229,13 +228,13 @@ const Part3 = ({ container }: Part3Props) => {
     <group position={[-0.2, 0, 0]}>
       <points
         scale={[
-          (0.002 * birdsTexture.image.width) / birdsTexture.image.height,
-          0.002,
+          (0.001 * birdsTexture.image.width) / birdsTexture.image.height,
+          0.001,
           0.0
         ]}
         geometry={birdsGeometry}
         material={birdsMaterial}
-        position={[1, 0.7, 0]}
+        position={[0.5, 0.3, 0]}
       />
       <points
         scale={[

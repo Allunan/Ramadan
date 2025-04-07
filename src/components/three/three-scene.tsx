@@ -1,4 +1,4 @@
-import { Chapter1, Chapter2 } from "@/components/three/chapters"
+import { Chapter1, Chapter2, Chapter3 } from "@/components/three/chapters"
 import Foreground from "@/components/three/foreground"
 import { shaderMaterial, useTexture } from "@react-three/drei"
 import { Canvas, extend, useFrame } from "@react-three/fiber"
@@ -57,9 +57,8 @@ export const ThreeScene: React.FC<{
         {/* <Background /> */}
         <Chapter1 container={container} />
         <Chapter2 container={container} />
-        {/* {showChapter2 && <Chapter2 />}
-        {showChapter3 && <Chapter3 />}
-        {showChapter4 && <Chapter4 />} */}
+        <Chapter3 container={container} />
+        {/* {showChapter4 && <Chapter4 />}  */}
 
         {/* <Curve /> */}
       </Canvas>
