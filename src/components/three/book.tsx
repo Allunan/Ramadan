@@ -3,7 +3,7 @@ import { OrbitControls, useHelper, useTexture } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import gsap from "gsap"
 import { easing } from "maath"
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import * as THREE from "three"
 
 interface BookProps {
@@ -27,7 +27,7 @@ const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS
 // Animation factors
 const easingFactor = 0.9
 const easingFactorFold = 0.9
-const insideCurveStrength = 0.18
+const insideCurveStrength = 0
 const outsideCurveStrength = 0.02
 const turningCurveStrength = 0.01
 
@@ -91,6 +91,17 @@ const Page = ({
   const [highlighted, setHighlighted] = useState(false)
   const turnedAt = useRef<number>(0)
   const lastOpened = useRef<boolean>(opened)
+
+  const insideCurveStrength = useRef(0)
+
+  useEffect(() => {
+    if (opened) {
+      gsap.to(insideCurveStrength, {
+        current: 0.18,
+        duration: 1
+      })
+    }
+  }, [opened])
 
   const manualSkinnedMesh = useMemo(() => {
     const bones: THREE.Bone[] = []
@@ -177,14 +188,15 @@ const Page = ({
         // const target = bones[i]
 
         // Calculate different curve intensities
-        const insideCurveIntensity = i < 8 ? Math.sin(i * 0.1 + 0.2) * 1 : 0
+        const insideCurveIntensity =
+          i < 8 ? Math.sin(i * 0.1 + 2.3 * (1 - i / bones.length)) * 1 : 0
         const outsideCurveIntensity = i >= 8 ? Math.cos(i * 0.3 + 0.09) : 0
         const turningIntensity =
           Math.sin(i * Math.PI * (1 / bones.length)) * turningTime
 
         // Calculate rotation angle with all effects combined
         let rotationAngle =
-          insideCurveStrength * insideCurveIntensity * targetRotation -
+          insideCurveStrength.current * insideCurveIntensity * targetRotation -
           outsideCurveStrength * outsideCurveIntensity * targetRotation +
           turningCurveStrength * turningIntensity * targetRotation
 
@@ -256,7 +268,7 @@ const Book = ({ container }: BookProps) => {
   const backCoverRef = useRef<THREE.Mesh>(null)
 
   // State for tracking if the book is open
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   // Book dimensions
   const bookWidth = 0.5
@@ -270,7 +282,9 @@ const Book = ({ container }: BookProps) => {
         y: -Math.PI,
         duration: 1,
         ease: "power2.inOut",
-        onComplete: () => setIsOpen(true)
+        onComplete: () => {
+          setIsOpen(true)
+        }
       })
     }
   })
@@ -297,9 +311,8 @@ const Book = ({ container }: BookProps) => {
       </group>
 
       {/* Page (completes full rotation) */}
-      <Page opened={isOpen} color="#f5f5f5" backColor="#e5e5e5" />
-      <Page opened={isOpen} color="#f5f5f5" backColor="#e5e5e5" />
       <Page opened={false} color="#f5f5f5" backColor="#e5e5e5" />
+      <Page opened={isOpen} color="#f5f5f5" backColor="#e5e5e5" />
 
       {/* Back Cover */}
       <mesh ref={backCoverRef} position={[0, 0, -bookThickness / 2]}>
